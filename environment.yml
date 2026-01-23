@@ -1,0 +1,4 @@
+name: is_group_project
+channels:
+  - defaults
+prefix: /opt/anaconda3/envs/is_group_project
