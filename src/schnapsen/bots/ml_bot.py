@@ -189,7 +189,7 @@ def train_ML_model(replay_memory_location: Optional[pathlib.Path],
         # needs a bigger dataset, but if you find the correct combination of neurons and neural layers and provide a big enough training dataset can lead to better performance
 
         # one layer of 30 neurons
-        hidden_layer_sizes = (30)
+        hidden_layer_sizes = (30,)
         # two layers of 30 and 5 neurons respectively
         # hidden_layer_sizes = (30, 5)
 

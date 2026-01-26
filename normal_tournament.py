@@ -30,8 +30,7 @@ class BullyAlphaBeta(Bot):
         return self._phase_one_bot.get_move(player_perspective, leader_move)
 
 # Depth values we want to test
-depths = [1, 2, 3, 4, 5, 10, 20, 50, 100, 200, 500, 1000]
-
+depths = range(1,1001)
 games_per_depth = 1000
 results = {}  # depth -> (rdeep_mean, alphabeta_mean, retries)
 
@@ -50,25 +49,39 @@ for depth in depths:
     games_played = 0
     while games_played < games_per_depth:
         try:
-            winner, game_points, _ = engine.play_game(rdeep_bot, opponent_bot, random.Random())
+                        # Game 1: Rdeep starts
+            winner, _, _ = engine.play_game(rdeep_bot, opponent_bot, random.Random())
+            if str(winner) == "rdeep":
+                rdeep_points.append(1)
+                opponent_points.append(0)
+            else:
+                rdeep_points.append(0)
+                opponent_points.append(1)
+            games_played += 1
+
+            if games_played >= games_per_depth:
+                break
+
+            # Game 2: Bully starts
+            winner, _, _ = engine.play_game(opponent_bot, rdeep_bot, random.Random())
+            if str(winner) == "rdeep":
+                rdeep_points.append(1)
+                opponent_points.append(0)
+            else:
+                rdeep_points.append(0)
+                opponent_points.append(1)
+            games_played += 1
+
         except ZeroDivisionError:
             retries += 1
             continue
-        if str(winner) == "rdeep":
-            rdeep_points.append(1)
-            opponent_points.append(0)
-        else:
-            rdeep_points.append(0)
-            opponent_points.append(1)
-        games_played += 1
-
     rdeep_avg = mean(rdeep_points)
     opponent_avg = mean(opponent_points)
     results[depth] = (rdeep_avg, opponent_avg, retries)
 
     print(f"Depth {depth}: Rdeep avg={rdeep_avg:.3f}, Bully+AlphaBeta avg={opponent_avg:.3f}")
 
-output_csv = "tournament_results.csv"
+output_csv = "normal_tournament_results.csv"
 file_exists = os.path.exists(output_csv)
 
 with open(output_csv, mode="a", newline="", encoding="utf-8") as f:
@@ -78,11 +91,7 @@ with open(output_csv, mode="a", newline="", encoding="utf-8") as f:
     if not file_exists or os.path.getsize(output_csv) == 0:
         writer.writerow([
             "depth",
-            "games_per_depth",
-            "rdeep_avg",
-            "opponent_avg",
             "rdeep_win_pct",
-            "opponent_win_pct",
             "retries",
         ])
 
@@ -91,26 +100,17 @@ with open(output_csv, mode="a", newline="", encoding="utf-8") as f:
     writer.writerow([f"new iteration"])
     writer.writerow([
         "depth",
-        "games_per_depth",
-        "rdeep_avg",
-        "opponent_avg",
         "rdeep_win_pct",
-        "opponent_win_pct",
         "retries",
     ])
 
     for depth in depths:
         rdeep_avg, opponent_avg, retries = results[depth]
         rdeep_pct = rdeep_avg * 100
-        opponent_pct = opponent_avg * 100
 
         writer.writerow([
             depth,
-            games_per_depth,
-            f"{rdeep_avg:.6f}",
-            f"{opponent_avg:.6f}",
             f"{rdeep_pct:.2f}",
-            f"{opponent_pct:.2f}",
             retries,
         ])
 
