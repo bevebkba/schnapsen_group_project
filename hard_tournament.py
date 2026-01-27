@@ -1,13 +1,16 @@
+# This script evaluates R-deep against a hard opponent (R-deep depth 10 + AlphaBeta)
+
 from schnapsen.game import SchnapsenGamePlayEngine, Bot, PlayerPerspective, Move, GamePhase
 from schnapsen.bots import RdeepBot, AlphaBetaBot
-import random                       #for 
-import os                           #for adding results to csv file
-import csv                          #for adding results to csv file
-from statistics import mean         #for calculating averages
-from typing import Optional         #for hybrit bot
+import random                       # randomness
+import os                           # for adding results to csv file
+import csv                          # csv output
+from statistics import mean         # for calculating averages
+from typing import Optional         # for hybrid bot
 
 engine = SchnapsenGamePlayEngine()
 
+# Hard opponent combining R-deep and AlphaBeta
 class RdeepAlphaBeta(Bot):
     """Uses rdeep bot in phase one and AlphaBeta bot in phase two."""
 
@@ -24,12 +27,13 @@ class RdeepAlphaBeta(Bot):
         player_perspective: PlayerPerspective,
         leader_move: Optional[Move],
     ) -> Move:
+        # Choose move based on game phase
         phase = player_perspective.get_phase()
         if phase == GamePhase.TWO:
             return self._phase_two_bot.get_move(player_perspective, leader_move)
         return self._phase_one_bot.get_move(player_perspective, leader_move)
 
-# Depth values we want to test
+# Experiment configuration
 depths = range(1,1001)
 games_per_depth = 1000
 results = {}  # depth -> (rdeep_mean, alphabeta_mean, retries)
@@ -45,6 +49,7 @@ for depth in depths:
     opponent_points = []
 
     # Run the tournament for this depth
+    # Alternate start player for fairness
     retries = 0
     games_played = 0
     while games_played < games_per_depth:
@@ -82,6 +87,7 @@ for depth in depths:
 
     print(f"Depth {depth}: Rdeep avg={rdeep_avg:.3f}, Rdeep+AlphaBeta avg={opponent_avg:.3f}")
 
+# Save results to CSV file
 output_csv = "hard_tournament_results.csv"
 file_exists = os.path.exists(output_csv)
 

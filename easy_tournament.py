@@ -9,7 +9,7 @@ engine = SchnapsenGamePlayEngine()
 
 # Depth values we want to test
 depths = range(1,1001)
-games_per_depth = 1000
+games_per_depth =/Users/bevebkba/Desktop/hard_tournament_results.csv 1000
 results = {}  # depth -> (rdeep_mean, bully_mean, retries)
 
 for depth in depths:
