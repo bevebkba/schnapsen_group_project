@@ -1,5 +1,5 @@
-from schnapsen.game import SchnapsenGamePlayEngine, Bot, PlayerPerspective, Move, GamePhase
-from schnapsen.bots import RdeepBot, AlphaBetaBot
+from schnapsen.game import SchnapsenGamePlayEngine, Bot, PlayerPerspective, Move, GamePhase #to create our custom opponent bot
+from schnapsen.bots import RdeepBot, AlphaBetaBot #for adding the bots that we will use
 import random                       #for 
 import os                           #for adding results to csv file
 import csv                          #for adding results to csv file
@@ -32,7 +32,16 @@ class RdeepAlphaBeta(Bot):
 # Depth values we want to test
 depths = range(1,1001)
 games_per_depth = 1000
-results = {}  # depth -> (rdeep_mean, alphabeta_mean, retries)
+
+output_csv = "hard_tournament_results.csv"
+file_exists = os.path.exists(output_csv)
+
+with open(output_csv, mode="a", newline="", encoding="utf-8") as f:
+    writer = csv.writer(f)
+    if not file_exists or os.path.getsize(output_csv) == 0:
+        writer.writerow(["depth", "rdeep_win_pct", "retries"])
+    else:
+        writer.writerow([]), writer.writerow(["new iteration"]), writer.writerow(["depth", "rdeep_win_pct", "retries"])
 
 for depth in depths:
     # Create bots for each depth
@@ -78,41 +87,7 @@ for depth in depths:
 
     rdeep_avg = mean(rdeep_points)
     opponent_avg = mean(opponent_points)
-    results[depth] = (rdeep_avg, opponent_avg, retries)
 
     print(f"Depth {depth}: Rdeep avg={rdeep_avg:.3f}, Rdeep+AlphaBeta avg={opponent_avg:.3f}")
-
-output_csv = "hard_tournament_results.csv"
-file_exists = os.path.exists(output_csv)
-
-with open(output_csv, mode="a", newline="", encoding="utf-8") as f:
-    writer = csv.writer(f)
-
-    # Header sadece dosya yoksa veya boşsa yazılsın
-    if not file_exists or os.path.getsize(output_csv) == 0:
-        writer.writerow([
-            "depth",
-            "rdeep_win_pct",
-            "retries",
-        ])
-
-    # Add a heading row for this run
-    writer.writerow([])
-    writer.writerow([f"new iteration"])
-    writer.writerow([
-        "depth",
-        "rdeep_win_pct",
-        "retries",
-    ])
-
-    for depth in depths:
-        rdeep_avg, opponent_avg, retries = results[depth]
-        rdeep_pct = rdeep_avg * 100
-
-        writer.writerow([
-            depth,
-            f"{rdeep_pct:.2f}",
-            retries,
-        ])
-
-print(f"\nSaved CSV results to: {output_csv}")
+    with open(output_csv, mode="a", newline="", encoding="utf-8") as f:
+        csv.writer(f).writerow([depth, f"{rdeep_avg * 100:.2f}", retries])
